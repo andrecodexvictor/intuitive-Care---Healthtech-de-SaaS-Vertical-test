@@ -1,0 +1,35 @@
+# =============================================================
+# requirements.txt - Dependências Consolidadas
+# =============================================================
+# INSTALAÇÃO SINGLE-COMMAND: 
+# pip install -r requirements.txt
+# =============================================================
+
+# --- Backend Core ---
+fastapi>=0.109.0        # Framework API
+uvicorn[standard]>=0.27.0 # Servidor ASGI
+pydantic>=2.5.3         # Validação
+pydantic-settings>=2.1.0 # Gestão de Configuração
+
+# --- Database ---
+sqlalchemy>=2.0.25      # ORM
+pymysql>=1.1.0          # Driver MySQL
+
+# --- Data Processing (ETL) ---
+pandas>=2.2.0           # Dataframes
+openpyxl>=3.1.2         # Excel
+requests>=2.31.0        # HTTP Client
+python-multipart>=0.0.9 # Uploads
+
+# --- Utils ---
+loguru>=0.7.2           # Logging
+email-validator>=2.1.0  # Validação Email (Pydantic)
+python-dotenv>=1.0.1    # Variáveis ambiente
+
+# --- Testing ---
+pytest>=8.0.0
+pytest-asyncio>=0.23.5
+httpx>=0.26.0
+
+# --- Frontend Tools (Opcional - se for rodar scripts python no front) ---
+# (Node.js dependencies are in frontend/package.json)
