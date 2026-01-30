@@ -277,6 +277,33 @@ async def health_check():
     )
 
 
+@app.get(
+    "/metrics",
+    summary="Métricas da API",
+    description="Retorna métricas de performance e uso da API.",
+    tags=["Utilitários"],
+)
+async def metrics_endpoint():
+    """
+    Endpoint de métricas para observabilidade.
+    
+    Retorna:
+    - Total de requisições
+    - Taxa de erros
+    - Tempo médio de resposta
+    - Distribuição por status code
+    - Top endpoints
+    """
+    try:
+        from src.infrastructure.observability import metrics
+        return metrics.get_metrics()
+    except ImportError:
+        return {
+            "error": "Módulo de observabilidade não disponível",
+            "message": "Use o módulo completo para métricas avançadas"
+        }
+
+
 # =============================================================
 # EXECUÇÃO DIRETA (para desenvolvimento)
 # =============================================================

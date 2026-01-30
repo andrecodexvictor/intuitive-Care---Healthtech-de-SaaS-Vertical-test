@@ -67,6 +67,9 @@ my md archives/
 "my md archives"
 requirements_old.txt
 
+# Skills temporários (agent tools)
+temp_skills/
+
 # --- Sistema Operacional ---
 Thumbs.db
 Desktop.ini

@@ -1,0 +1,231 @@
+{
+    "info": {
+        "_postman_id": "intuitive-care-api-collection",
+        "name": "Intuitive Care API",
+        "description": "API de Análise de Despesas de Operadoras de Planos de Saúde\n\n## Endpoints Disponíveis\n\n### Operadoras\n- Listagem paginada\n- Busca por razão social\n- Detalhes por CNPJ\n- Histórico de despesas\n\n### Estatísticas\n- Agregações gerais\n- Distribuição por UF\n- Top 5 operadoras\n\n### Utilitários\n- Health check\n- Métricas",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8000",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Utilitários",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/health",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Verifica se a API está saudável. Usado por load balancers e sistemas de monitoramento."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Métricas",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/metrics",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "metrics"
+                            ]
+                        },
+                        "description": "Retorna métricas de performance e uso da API."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Raiz",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                ""
+                            ]
+                        },
+                        "description": "Informações básicas da API."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Operadoras",
+            "item": [
+                {
+                    "name": "Listar Operadoras",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/operadoras?page=1&limit=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "operadoras"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Número da página (1-indexed)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20",
+                                    "description": "Itens por página (max 100)"
+                                }
+                            ]
+                        },
+                        "description": "Lista operadoras com paginação offset-based.\n\n**Trade-off**: Offset é simples mas ineficiente para páginas altas. Adequado para ~5000 registros."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Buscar Operadoras por Razão Social",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/operadoras?razao_social=unimed&page=1&limit=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "operadoras"
+                            ],
+                            "query": [
+                                {
+                                    "key": "razao_social",
+                                    "value": "unimed",
+                                    "description": "Filtro por razão social (case insensitive, LIKE)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "description": "Busca operadoras filtrando por razão social."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Detalhes da Operadora",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/operadoras/12345678000190",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "operadoras",
+                                "12345678000190"
+                            ]
+                        },
+                        "description": "Retorna detalhes completos de uma operadora pelo CNPJ.\n\n**Nota**: CNPJ sem máscara (14 dígitos)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Despesas da Operadora",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/operadoras/12345678000190/despesas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "operadoras",
+                                "12345678000190",
+                                "despesas"
+                            ]
+                        },
+                        "description": "Retorna histórico de despesas de uma operadora, ordenado por período."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Estatísticas",
+            "item": [
+                {
+                    "name": "Estatísticas Gerais",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/estatisticas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "estatisticas"
+                            ]
+                        },
+                        "description": "Retorna estatísticas agregadas:\n- Total de despesas\n- Média por registro\n- Quantidade de registros\n- Top 5 operadoras\n\n**Trade-off**: Cache em memória (15 min TTL) para evitar queries pesadas."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Distribuição por UF",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/estatisticas/distribuicao-uf",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "estatisticas",
+                                "distribuicao-uf"
+                            ]
+                        },
+                        "description": "Retorna distribuição de despesas agrupadas por UF."
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}
