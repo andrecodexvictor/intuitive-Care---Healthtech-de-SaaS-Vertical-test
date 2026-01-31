@@ -1,150 +1,122 @@
-# 🏥 Meu Projeto: API de Análise de Despesas de Operadoras
+# 🏥 API de Análise de Despesas de Operadoras de Saúde
 
-> **Olá!** Esse é o meu projeto para o Teste de Estágio da Intuitive Care.
-> Aqui eu documento não só *o que* eu fiz, mas principalmente *por que* tomei cada decisão.
-
----
-
-## 👋 Sobre Este Projeto
-
-Eu construí uma **API REST completa** para analisar despesas de operadoras de planos de saúde, consumindo dados públicos da ANS. O projeto inclui:
-
-- **Backend** em Python/FastAPI com arquitetura limpa
-- **Frontend** em Vue.js com dashboard e gráficos
-- **ETL** para baixar, processar e validar dados da ANS
-- **Banco de dados** MySQL com queries analíticas
-
-**Por que essas tecnologias?** Explico cada escolha mais abaixo! 👇
+> **Teste Técnico para Estágio** — Intuitive Care  
+> Este documento apresenta a solução desenvolvida, com foco nas decisões técnicas e justificativas adotadas.
 
 ---
 
-## 🎯 O Que Eu Construí
+## 📋 Sumário Executivo
 
-| Componente | O Que Faz | Status |
+Este projeto consiste em uma **API REST completa** para análise de despesas de operadoras de planos de saúde, utilizando dados públicos da ANS (Agência Nacional de Saúde Suplementar).
+
+### Componentes Desenvolvidos
+
+| Componente | Descrição | Status |
 |------------|-----------|--------|
-| 📥 **ETL** | Baixa dados da ANS, valida CNPJs, consolida trimestres | ✅ Pronto |
-| 🔌 **API** | 4 endpoints RESTful com documentação automática | ✅ Pronto |
-| 🖥️ **Frontend** | Dashboard com gráficos e tabela paginada | ✅ Pronto |
-| 🗄️ **Banco** | Schema MySQL + 3 queries analíticas | ✅ Pronto |
-| 📊 **Observabilidade** | Logging estruturado, métricas, health check | ✅ Pronto |
-| 🧪 **Testes** | Suite pytest com fixtures | ✅ Estrutura Pronta |
+| **ETL** | Pipeline de ingestão: download, validação de CNPJs, consolidação de trimestres | ✅ Implementado |
+| **API REST** | 4 endpoints RESTful com documentação OpenAPI automática | ✅ Implementado |
+| **Frontend** | Dashboard Vue.js com visualizações e tabela paginada | ✅ Implementado |
+| **Banco de Dados** | Schema MySQL + 3 queries analíticas conforme requisitos | ✅ Implementado |
+| **Observabilidade** | Logging estruturado, métricas de performance, health check | ✅ Implementado |
+| **Testes** | Suite pytest com 18 testes automatizados | ✅ Implementado |
 
 ---
 
-## 🏗️ Por Que Escolhi Clean Architecture?
+## 🏗️ Arquitetura
 
-Quando comecei o projeto, pensei: *"Qual arquitetura me permite mudar de banco de dados sem reescrever a API?"*
+Foi adotada a **Clean Architecture** para garantir separação de responsabilidades e facilitar manutenção futura.
 
-A resposta foi **Clean Architecture**. Veja como organizei:
+### Estrutura de Camadas
 
 ```
 src/
-├── domain/          # 💎 O coração: regras de negócio puras
-│   └── entities.py  # Operadora, Despesa, CNPJ (sem dependências!)
+├── domain/          # Regras de negócio puras (sem dependências externas)
+│   └── entities.py  # Operadora, Despesa, CNPJ
 │
-├── application/     # 📋 Orquestração: o que o sistema FAZ
-│   └── interfaces.py # Contratos abstratos (Repository Pattern)
+├── application/     # Orquestração e contratos
+│   └── interfaces.py # Interfaces abstratas (Repository Pattern)
 │
-├── infrastructure/  # 🔧 Implementações concretas
+├── infrastructure/  # Implementações concretas
 │   └── database/    # SQLAlchemy, MySQL
 │
-├── interface/       # 🌐 Como o mundo externo interage
-│   └── api/         # FastAPI routers
+├── interface/       # Camada de apresentação
+│   └── api/         # Routers FastAPI
 │
-└── etl/             # 📥 Pipeline de ingestão de dados
+└── etl/             # Pipeline de ingestão de dados
 ```
 
-**O benefício prático?** Se amanhã eu precisar trocar MySQL por PostgreSQL, só mudo os arquivos em `infrastructure/`. O resto do código nem percebe.
+### Justificativa da Escolha
+
+1. **Testabilidade**: Camada de Domain sem dependências possibilita testes unitários puros
+2. **Manutenibilidade**: Migração de banco de dados afeta apenas a camada Infrastructure
+3. **Clareza**: Responsabilidades bem definidas facilitam onboarding de novos desenvolvedores
 
 ---
 
-## 🛠️ Minhas Escolhas Técnicas (e Por Quê)
+## 🛠️ Stack Tecnológica
 
-### FastAPI ao invés de Flask
-
-Eu poderia ter usado Flask (que já conheço bem), mas escolhi FastAPI porque:
-
-1. **Documentação automática**: Swagger UI gerado sem escrever uma linha
-2. **Validação nativa**: Pydantic valida requests automaticamente
-3. **Async nativo**: Preparado para escalar se precisar
-
-*Trade-off aceito*: Curva de aprendizado inicial maior.
-
-### MySQL ao invés de PostgreSQL
-
-Sinceramente? **Familiaridade operacional**. Eu sei debugar MySQL mais rápido, e para ~5000 operadoras, as features avançadas do PostgreSQL não fariam diferença.
-
-*Se o volume fosse maior*: PostgreSQL seria minha escolha pela performance em queries analíticas complexas.
-
-### Paginação Offset ao invés de Cursor
-
-Escolhi offset-based (`?page=1&limit=20`) porque:
-
-- O frontend precisa mostrar "Página 3 de 15"
-- Os dados são estáticos (atualizados trimestralmente)
-- ~5000 registros não causam degradação perceptível
-
-*Quando eu mudaria*: Se tivesse milhões de registros com alta frequência de inserção.
+| Tecnologia | Justificativa |
+|------------|---------------|
+| **FastAPI** | Documentação automática, validação nativa com Pydantic, suporte async |
+| **SQLAlchemy** | ORM maduro com suporte a múltiplos bancos de dados |
+| **MySQL 8.0** | Familiaridade operacional, adequado ao volume do projeto |
+| **Pydantic V2** | Performance 10x superior à V1, integração nativa com FastAPI |
+| **Vue.js 3** | Composition API moderna, excelente developer experience |
+| **Loguru** | Logging estruturado com API simplificada |
 
 ---
 
-## 🚀 Como Executar
+## 🚀 Instruções de Execução
 
 ### Pré-requisitos
 
-Você vai precisar de:
-- Python 3.9 ou superior
-- MySQL 8.0 (ou MariaDB 10.5+)
-- Node.js 18+ (para o frontend)
-- Git
+- Python 3.9+
+- MySQL 8.0+
+- Node.js 18+
 
-### 1. Clone o Projeto
+### 1. Configuração do Ambiente
 
 ```bash
+# Clone o repositório
 git clone https://github.com/andrecodexvictor/intuitive-Care---Healthtech-de-SaaS-Vertical-test.git
 cd intuitive-Care---Healthtech-de-SaaS-Vertical-test
-```
 
-### 2. Configure o Backend
-
-```bash
-# Crie e ative o ambiente virtual
+# Ambiente virtual Python
 python -m venv venv
 venv\Scripts\activate  # Windows
 # source venv/bin/activate  # Linux/Mac
 
-# Instale as dependências
+# Instalação de dependências
 pip install -r requirements.txt
 ```
 
-### 3. Configure o Banco de Dados
+### 2. Configuração do Banco de Dados
 
 ```bash
-# Crie o banco no MySQL
 mysql -u root -p -e "CREATE DATABASE intuitive_care_test CHARACTER SET utf8mb4;"
 ```
 
-Crie um arquivo `.env` na raiz:
+Crie o arquivo `.env` na raiz do projeto:
 
 ```env
 DATABASE_HOST=localhost
 DATABASE_PORT=3306
 DATABASE_USER=root
-DATABASE_PASSWORD=sua_senha_aqui
+DATABASE_PASSWORD=sua_senha
 DATABASE_NAME=intuitive_care_test
 API_DEBUG=true
 LOG_LEVEL=INFO
 ```
 
-### 4. Inicie a API
+### 3. Execução da API
 
 ```bash
 uvicorn src.main:app --reload --port 8000
 ```
 
-Acesse a documentação em: **http://localhost:8000/docs** 🎉
+**Documentação disponível em:** http://localhost:8000/docs
 
-### 5. Inicie o Frontend
+### 4. Execução do Frontend
 
 ```bash
 cd frontend
@@ -152,7 +124,7 @@ npm install
 npm run dev
 ```
 
-Acesse o dashboard em: **http://localhost:5173** 🎉
+**Dashboard disponível em:** http://localhost:5173
 
 ---
 
@@ -164,82 +136,81 @@ Acesse o dashboard em: **http://localhost:5173** 🎉
 | GET | `/api/operadoras/{cnpj}` | Detalhes de uma operadora |
 | GET | `/api/operadoras/{cnpj}/despesas` | Histórico de despesas |
 | GET | `/api/estatisticas` | Agregações e rankings |
-| GET | `/health` | Health check |
+| GET | `/health` | Verificação de saúde do serviço |
 | GET | `/metrics` | Métricas de performance |
 
-### Exemplo de Uso
+### Exemplos de Requisição
 
 ```bash
-# Listar operadoras (página 1, 20 por página)
-curl http://localhost:8000/api/operadoras?page=1&limit=20
+# Listar operadoras com paginação
+curl "http://localhost:8000/api/operadoras?page=1&limit=20"
 
-# Buscar por nome
-curl http://localhost:8000/api/operadoras?razao_social=UNIMED
+# Filtrar por razão social
+curl "http://localhost:8000/api/operadoras?razao_social=UNIMED"
 
-# Ver estatísticas
-curl http://localhost:8000/api/estatisticas
+# Obter estatísticas gerais
+curl "http://localhost:8000/api/estatisticas"
 ```
 
 ---
 
-## 🧪 Rodando os Testes
+## 🧪 Testes
 
 ```bash
+# Executar todos os testes
 pytest
+
+# Resultado esperado: 18 passed, 5 skipped
 ```
+
+Os testes de integração são automaticamente ignorados quando o MySQL não está disponível.
 
 ---
 
-## ⚖️ Trade-offs Que Eu Fiz
+## ⚖️ Trade-offs e Decisões
 
-Aqui está um resumo honesto das decisões que envolvem compromissos:
-
-| Decisão | O Que Ganhei | O Que Perdi |
-|---------|--------------|-------------|
-| Offset pagination | URLs simples, frontend fácil | Performance degrada com milhões |
-| Cache em memória | Sem Redis pra instalar | Não escala horizontal |
-| Manter dados inválidos | Transparência, auditoria | Frontend precisa filtrar |
-| MySQL | Setup fácil, familiaridade | Menos features que PostgreSQL |
+| Decisão | Benefício | Custo | Justificativa |
+|---------|-----------|-------|---------------|
+| Paginação Offset | URLs simples, cálculo de páginas direto | Performance degrada com alto volume | ~5000 registros é gerenciável |
+| Cache em Memória | Sem dependências adicionais | Não escala horizontalmente | Instância única suficiente |
+| Manter Dados Inválidos | Preservação para auditoria | Requer filtros no frontend | Transparência prioritária |
+| MySQL | Setup simplificado, familiaridade | Menos features que PostgreSQL | Adequado ao caso de uso |
 
 ---
 
-## 📁 Estrutura Completa do Projeto
+## 📁 Estrutura do Projeto
 
 ```
-├── src/
-│   ├── main.py              # Entry point da API
-│   ├── config.py            # Configurações centralizadas
-│   ├── domain/              # Entidades de negócio
-│   ├── application/         # Interfaces e contratos
-│   ├── infrastructure/      # Implementações (DB, observabilidade)
-│   ├── interface/           # Routers FastAPI
-│   └── etl/                 # Pipeline de dados
+├── src/                     # Código-fonte backend
 ├── frontend/                # Vue.js 3 + Vite
 ├── sql/                     # Schema e queries analíticas
-├── tests/                   # Pytest suite
+├── tests/                   # Suite de testes pytest
 ├── docs/                    # Postman collection
-└── README.md                # Você está aqui! 👋
+├── requirements.txt         # Dependências Python
+└── README.md                # Documentação principal
 ```
 
 ---
 
-## 🔮 O Que Eu Faria Com Mais Tempo
+## 🔮 Melhorias Futuras
 
-1. **Executar ETL real**: Baixar dados atuais da ANS
-2. **Aumentar cobertura de testes**: Meta de 80%+
-3. **Docker Compose**: Subir tudo com um comando
-4. **CI/CD**: GitHub Actions para testes automáticos
-5. **Monitoramento**: Prometheus + Grafana
+Com mais tempo disponível, implementaria:
+
+1. **Execução do ETL real** com dados atualizados da ANS
+2. **Cobertura de testes > 80%** na camada de Application
+3. **Docker Compose** para ambiente de desenvolvimento unificado
+4. **CI/CD** com GitHub Actions
+5. **Monitoramento** com Prometheus e Grafana
 
 ---
 
-## 👤 Sobre Mim
+## 👤 Autor
 
-Esse projeto foi desenvolvido como parte do processo seletivo para estágio na **Intuitive Care**.
+**André Victor Andrade Oliveira Santos**
 
-Tentei mostrar não apenas que sei programar, mas que sei **tomar decisões técnicas fundamentadas** e **documentá-las claramente**.
+Este projeto foi desenvolvido como parte do processo seletivo para estágio na **Intuitive Care**.
 
-Se você chegou até aqui, obrigado por ler! 🙏
+O objetivo foi demonstrar não apenas habilidades técnicas de programação, mas também a capacidade de **tomar decisões técnicas fundamentadas** e **documentá-las de forma clara e profissional**.
 
 ---
 
