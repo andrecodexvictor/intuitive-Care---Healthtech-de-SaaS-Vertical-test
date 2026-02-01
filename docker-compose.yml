@@ -46,7 +46,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DATABASE_PASSWORD:-intuitive_care_2024}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DATABASE_PASSWORD:-intuitive_care_2024}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -83,6 +83,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - ./src:/app/src
       - ./data:/app/data
       - ./logs:/app/logs
     extra_hosts:
@@ -93,7 +94,7 @@ services:
       mysql:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -126,7 +127,7 @@ services:
     depends_on:
       - api
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/"]
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/" ]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -160,9 +161,9 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    command: ["python", "run_etl.py", "--trimestres", "3"]
+    command: [ "python", "run_etl.py", "--trimestres", "3" ]
     profiles:
-      - etl  # Só roda quando explicitamente chamado: docker-compose --profile etl up etl
+      - etl # Só roda quando explicitamente chamado: docker-compose --profile etl up etl
     networks:
       intuitive_network:
         ipv4_address: 172.28.1.40

@@ -1,211 +1,559 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
     <title>API de Despesas - Documentação</title>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Documentação da API de Análise de Despesas de Operadoras de Saúde - Intuitive Care">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #1a1a2e;
-            --bg-secondary: #16213e;
-            --bg-code: #0f172a;
-            --text-primary: #eee;
-            --text-secondary: #94a3b8;
-            --text-muted: #666;
-            --accent-primary: #0ea5e9;
-            --accent-secondary: #38bdf8;
-            --color-get: #22c55e;
+            --bg-gradient-start: #0f0f23;
+            --bg-gradient-end: #1a1a3e;
+            --bg-card: rgba(30, 30, 60, 0.6);
+            --bg-card-hover: rgba(40, 40, 80, 0.8);
+            --bg-code: rgba(15, 15, 35, 0.8);
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0c0;
+            --text-muted: #6b6b8a;
+            --accent-primary: #00d4ff;
+            --accent-secondary: #7c3aed;
+            --accent-tertiary: #10b981;
+            --color-get: #10b981;
             --color-post: #3b82f6;
             --color-put: #f59e0b;
             --color-delete: #ef4444;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(0, 212, 255, 0.3);
+            --shadow-glow: 0 0 40px rgba(0, 212, 255, 0.15);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
         }
         
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
         
         body { 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            padding: 40px; 
-            background: var(--bg-primary); 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            background-attachment: fixed;
             color: var(--text-primary);
-            line-height: 1.6;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* Animated background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(124, 58, 237, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.06) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 40px;
         }
         
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+        }
+
+        .logo-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
         h1 { 
-            color: var(--accent-primary); 
-            margin-bottom: 10px;
-        }
-        
-        h2 { 
-            color: var(--accent-secondary); 
-            border-bottom: 1px solid #333; 
-            padding-bottom: 10px;
-            margin-top: 30px;
-        }
-        
-        .endpoint { 
-            background: var(--bg-secondary); 
-            padding: 15px 20px; 
-            border-radius: 8px; 
-            margin: 15px 0;
-            border-left: 4px solid var(--accent-primary);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .endpoint:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        
-        .method { 
-            display: inline-block; 
-            padding: 4px 12px; 
-            border-radius: 4px; 
-            font-weight: bold; 
-            margin-right: 10px;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-        
-        .get { background: var(--color-get); color: #fff; }
-        .post { background: var(--color-post); color: #fff; }
-        .put { background: var(--color-put); color: #fff; }
-        .delete { background: var(--color-delete); color: #fff; }
-        
-        code { 
-            background: var(--bg-code); 
-            padding: 2px 8px; 
-            border-radius: 4px;
-            font-family: 'Consolas', 'Monaco', monospace;
-        }
-        
-        a { 
-            color: var(--accent-secondary);
-            text-decoration: none;
-        }
-        
-        a:hover {
-            text-decoration: underline;
-        }
-        
-        .desc { 
-            color: var(--text-secondary); 
-            margin-top: 8px;
-            font-size: 14px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
         }
         
         .subtitle {
             color: var(--text-secondary);
-            margin-bottom: 30px;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        /* Section Titles */
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .section-icon {
+            font-size: 1.5rem;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+
+        h2 { 
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
         }
         
-        .footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #333;
-            color: var(--text-muted);
+        /* Endpoint Cards */
+        .endpoint { 
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 24px 28px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .endpoint::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .endpoint:hover {
+            background: var(--bg-card-hover);
+            transform: translateX(8px);
+            box-shadow: var(--shadow-glow);
+            border-color: var(--border-glow);
+        }
+
+        .endpoint:hover::before {
+            opacity: 1;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .method { 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: 'JetBrains Mono', monospace;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .get { 
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+        }
+        .post { 
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #fff;
+        }
+        .put { 
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+        }
+        .delete { 
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+        }
+        
+        code { 
+            background: var(--bg-code);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 14px;
+            color: var(--accent-primary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* Badges */
+        .badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
         
         .cache-info {
-            display: inline-block;
-            background: #7c3aed;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            margin-left: 10px;
+            background: rgba(124, 58, 237, 0.2);
+            color: #a78bfa;
+            border: 1px solid rgba(124, 58, 237, 0.3);
         }
         
         .rate-limit {
-            display: inline-block;
-            background: #f97316;
-            color: white;
+            background: rgba(249, 115, 22, 0.2);
+            color: #fb923c;
+            border: 1px solid rgba(249, 115, 22, 0.3);
+        }
+        
+        .desc { 
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .desc code {
+            font-size: 12px;
             padding: 2px 8px;
-            border-radius: 4px;
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-primary);
+        }
+
+        /* Links */
+        a { 
+            color: var(--accent-primary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        a:hover {
+            color: var(--accent-secondary);
+            text-decoration: underline;
+        }
+        
+        /* Footer */
+        .footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .version-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .copyright {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 20px;
+        }
+
+        /* Try it badge */
+        .try-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-tertiary);
+            border-radius: 20px;
             font-size: 11px;
-            margin-left: 5px;
+            font-weight: 500;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .try-badge:hover {
+            background: rgba(16, 185, 129, 0.25);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .endpoint {
+                padding: 20px;
+            }
+
+            .endpoint-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Selection styling */
+        ::selection {
+            background: var(--accent-primary);
+            color: var(--bg-gradient-start);
         }
     </style>
 </head>
 <body>
-    <h1>🏥 API de Análise de Despesas</h1>
-    <p class="subtitle">Intuitive Care - Teste Técnico para Estágio</p>
-    
-    <h2>📋 Operadoras</h2>
-    
-    <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/api/operadoras</code>
-        <span class="rate-limit">100/min</span>
-        <div class="desc">Lista paginada de operadoras. Params: <code>page</code>, <code>limit</code>, <code>razao_social</code>, <code>cnpj</code></div>
-    </div>
-    
-    <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/api/operadoras/{cnpj}</code>
-        <span class="rate-limit">100/min</span>
-        <div class="desc">Detalhes de uma operadora específica</div>
-    </div>
-    
-    <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/api/operadoras/{cnpj}/despesas</code>
-        <span class="rate-limit">100/min</span>
-        <div class="desc">Histórico de despesas de uma operadora. Params: <code>ano</code>, <code>trimestre</code></div>
-    </div>
-    
-    <h2>📊 Estatísticas</h2>
-    
-    <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/api/estatisticas</code>
-        <span class="cache-info">Cache 24h</span>
-        <span class="rate-limit">50/min</span>
-        <div class="desc">Estatísticas gerais: total, média, top 5 operadoras</div>
-    </div>
-    
-    <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/api/estatisticas/distribuicao-uf</code>
-        <span class="cache-info">Cache 24h</span>
-        <span class="rate-limit">50/min</span>
-        <div class="desc">Distribuição de despesas por UF</div>
-    </div>
-    
-    <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/api/estatisticas/operadoras-acima-media</code>
-        <span class="cache-info">Cache 24h</span>
-        <span class="rate-limit">50/min</span>
-        <div class="desc">Operadoras com despesas acima da média em 2+ trimestres (Query 3)</div>
-    </div>
-    
-    <h2>🔧 Utilitários</h2>
-    
-    <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/health</code>
-        <div class="desc">Health check - verifica se a API está saudável</div>
-    </div>
-    
-    <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/metrics</code>
-        <div class="desc">Métricas de performance da API</div>
-    </div>
-    
-    <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/cache/stats</code>
-        <div class="desc">Estatísticas dos caches (hits, misses, hit rate)</div>
-    </div>
-    
-    <div class="footer">
-        <p>Versão {{version}} | <a href="/">Voltar</a> | <a href="/openapi.json">OpenAPI JSON</a></p>
-        <p>© 2026 André Victor Andrade Oliveira Santos</p>
+    <div class="container">
+        <header class="header">
+            <span class="logo-icon">🏥</span>
+            <h1>API de Análise de Despesas</h1>
+            <p class="subtitle">Intuitive Care — Teste Técnico para Estágio</p>
+        </header>
+        
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">📋</div>
+                <h2>Operadoras</h2>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <code>/api/operadoras</code>
+                    <div class="badges">
+                        <span class="rate-limit">⚡ 100/min</span>
+                        <a href="/api/operadoras?limit=5" target="_blank" class="try-badge">🔗 Testar</a>
+                    </div>
+                </div>
+                <div class="desc">Lista paginada de operadoras. Parâmetros: <code>page</code>, <code>limit</code>, <code>razao_social</code>, <code>cnpj</code></div>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <code>/api/operadoras/{cnpj}</code>
+                    <div class="badges">
+                        <span class="rate-limit">⚡ 100/min</span>
+                    </div>
+                </div>
+                <div class="desc">Detalhes completos de uma operadora específica pelo CNPJ</div>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <code>/api/operadoras/{cnpj}/despesas</code>
+                    <div class="badges">
+                        <span class="rate-limit">⚡ 100/min</span>
+                    </div>
+                </div>
+                <div class="desc">Histórico de despesas de uma operadora. Parâmetros: <code>ano</code>, <code>trimestre</code></div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">📊</div>
+                <h2>Estatísticas</h2>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <code>/api/estatisticas</code>
+                    <div class="badges">
+                        <span class="cache-info">💾 Cache 24h</span>
+                        <span class="rate-limit">⚡ 50/min</span>
+                        <a href="/api/estatisticas" target="_blank" class="try-badge">🔗 Testar</a>
+                    </div>
+                </div>
+                <div class="desc">Estatísticas gerais: total de despesas, média e top 5 operadoras</div>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <code>/api/estatisticas/distribuicao-uf</code>
+                    <div class="badges">
+                        <span class="cache-info">💾 Cache 24h</span>
+                        <span class="rate-limit">⚡ 50/min</span>
+                        <a href="/api/estatisticas/distribuicao-uf" target="_blank" class="try-badge">🔗 Testar</a>
+                    </div>
+                </div>
+                <div class="desc">Distribuição de despesas agrupadas por UF (Unidade Federativa)</div>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <code>/api/estatisticas/operadoras-acima-media</code>
+                    <div class="badges">
+                        <span class="cache-info">💾 Cache 24h</span>
+                        <span class="rate-limit">⚡ 50/min</span>
+                    </div>
+                </div>
+                <div class="desc">Operadoras com despesas acima da média em 2+ trimestres consecutivos</div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">🔧</div>
+                <h2>Utilitários</h2>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <code>/health</code>
+                    <div class="badges">
+                        <a href="/health" target="_blank" class="try-badge">🔗 Testar</a>
+                    </div>
+                </div>
+                <div class="desc">Health check — verifica se a API está saudável e operacional</div>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <code>/metrics</code>
+                    <div class="badges">
+                        <a href="/metrics" target="_blank" class="try-badge">🔗 Testar</a>
+                    </div>
+                </div>
+                <div class="desc">Métricas de performance da API (requisições, latência, erros)</div>
+            </div>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <code>/cache/stats</code>
+                    <div class="badges">
+                        <a href="/cache/stats" target="_blank" class="try-badge">🔗 Testar</a>
+                    </div>
+                </div>
+                <div class="desc">Estatísticas dos caches — hits, misses e hit rate</div>
+            </div>
+        </section>
+        
+        <footer class="footer">
+            <div class="footer-content">
+                <span class="version-badge">📦 v{{version}}</span>
+                <div class="footer-links">
+                    <a href="/" class="footer-link">🏠 Home</a>
+                    <a href="/openapi.json" class="footer-link" target="_blank">📄 OpenAPI JSON</a>
+                </div>
+            </div>
+            <p class="copyright">© 2026 André Victor Andrade Oliveira Santos — Intuitive Care</p>
+        </footer>
     </div>
 </body>
 </html>

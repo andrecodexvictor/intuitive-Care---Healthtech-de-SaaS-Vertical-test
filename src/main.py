@@ -113,7 +113,7 @@ app = FastAPI(
     lifespan=lifespan,
     docs_url=None,  # Desabilitado - usando /docs customizado
     redoc_url=None,  # Desabilitado
-    openapi_url=None,  # Desabilitado
+    openapi_url="/openapi.json",  # Habilitado para acesso ao schema
 )
 
 
@@ -153,9 +153,19 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # Proteção XSS (browsers modernos)
         response.headers["X-XSS-Protection"] = "1; mode=block"
         
-        # Content Security Policy básica
+        # Content Security Policy - permitir estilos inline e Google Fonts para /docs
         if settings.ENVIRONMENT == "production":
-            response.headers["Content-Security-Policy"] = "default-src 'self'"
+            # CSP mais permissiva para página de documentação
+            if request.url.path == "/docs":
+                response.headers["Content-Security-Policy"] = (
+                    "default-src 'self'; "
+                    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                    "font-src 'self' https://fonts.gstatic.com; "
+                    "img-src 'self' data:; "
+                    "script-src 'self'"
+                )
+            else:
+                response.headers["Content-Security-Policy"] = "default-src 'self'"
             # HSTS para HTTPS (apenas em produção)
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         
