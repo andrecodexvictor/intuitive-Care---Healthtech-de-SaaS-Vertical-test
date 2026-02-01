@@ -23,8 +23,22 @@ class TestSettings:
         """Configurações devem ter valores padrão sensatos."""
         from src.config import Settings
         
-        # Cria settings com valores padrão
-        with patch.dict(os.environ, {}, clear=False):
+        # Limpa variáveis de ambiente que podem sobrescrever os padrões
+        env_overrides = {
+            "DATABASE_HOST": "",
+            "DATABASE_PORT": "",
+            "DATABASE_NAME": "",
+            "API_VERSION": "",
+            "DEFAULT_PAGE_SIZE": "",
+            "MAX_PAGE_SIZE": "",
+            "RATE_LIMIT_PER_MINUTE": "",
+        }
+        
+        # Cria settings com valores padrão (remove vars de ambiente do CI)
+        with patch.dict(os.environ, env_overrides, clear=False):
+            # Remove as chaves vazias para forçar os defaults
+            for key in env_overrides:
+                os.environ.pop(key, None)
             settings = Settings()
         
         assert settings.DATABASE_HOST == "localhost"
