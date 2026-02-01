@@ -50,6 +50,24 @@ CREATE INDEX IF NOT EXISTS idx_despesas_valor
 ON despesas(valor DESC);
 
 -- =============================================================
+-- ÍNDICE 5: Fulltext para busca por razão social
+-- =============================================================
+-- JUSTIFICATIVA: Permite busca textual eficiente
+-- Alternativa ao LIKE '%termo%' que não usa índice
+-- =============================================================
+-- NOTA: Fulltext requer MySQL 5.6+ com InnoDB
+ALTER TABLE operadoras ADD FULLTEXT INDEX idx_razao_social_fulltext (razao_social);
+
+-- =============================================================
+-- ÍNDICE 6: Índice para busca por prefixo de razão social
+-- =============================================================
+-- JUSTIFICATIVA: LIKE 'termo%' (trailing wildcard) usa este índice
+-- Complementa o fulltext para buscas por prefixo
+-- =============================================================
+CREATE INDEX IF NOT EXISTS idx_razao_social_prefix 
+ON operadoras(razao_social(50));
+
+-- =============================================================
 -- ATUALIZAR ESTATÍSTICAS DO OTIMIZADOR
 -- =============================================================
 -- IMPORTANTE: Necessário após criar índices para otimizador usar

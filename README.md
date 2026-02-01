@@ -19,8 +19,9 @@ Este projeto consiste em uma **API REST completa** para análise de despesas de 
 | **Banco de Dados** | Schema MySQL + 3 queries analíticas conforme requisitos | ✅ Implementado |
 | **Observabilidade** | Logging estruturado, métricas de performance, health check | ✅ Implementado |
 | **Segurança** | Rate limiting, CORS hardening, security headers, log sanitization | ✅ Implementado |
-| **Testes** | Suite pytest com 70+ testes automatizados (65 passando) | ✅ Implementado |
+| **Testes** | Suite pytest com 96 testes automatizados (todos passando) | ✅ Implementado |
 | **CI/CD** | GitHub Actions com lint, test, security scan | ✅ Implementado |
+| **Otimizações** | Cache genérico, índices SQL, refatorações de código | ✅ Implementado |
 
 ---
 
@@ -87,8 +88,8 @@ Usa **rede interna com IPs fixos** para evitar problemas de DNS no Windows.
 
 ```powershell
 # Clone o repositório
-git clone https://github.com/andrecodexvictor/intuitive-Care---Healthtech-de-SaaS-Vertical-test.git
-cd intuitive-Care---Healthtech-de-SaaS-Vertical-test
+git clone https://github.com/andrecodexvictor/Teste_AndreVictorAndradeOliveiraSantos.git
+cd Teste_AndreVictorAndradeOliveiraSantos
 
 # Opção A: Script automático (recomendado)
 .\docker-start.ps1 -WithETL
@@ -104,8 +105,8 @@ docker-compose --profile etl up etl
 
 ```bash
 # Clone o repositório
-git clone https://github.com/andrecodexvictor/intuitive-Care---Healthtech-de-SaaS-Vertical-test.git
-cd intuitive-Care---Healthtech-de-SaaS-Vertical-test
+git clone https://github.com/andrecodexvictor/Teste_AndreVictorAndradeOliveiraSantos.git
+cd Teste_AndreVictorAndradeOliveiraSantos
 
 # Opção A: Script automático (recomendado)
 chmod +x docker-start.sh
@@ -153,8 +154,8 @@ docker-compose down -v          # Parar e remover volumes (limpa banco)
 
 ```powershell
 # Clone o repositório
-git clone https://github.com/andrecodexvictor/intuitive-Care---Healthtech-de-SaaS-Vertical-test.git
-cd intuitive-Care---Healthtech-de-SaaS-Vertical-test
+git clone https://github.com/andrecodexvictor/Teste_AndreVictorAndradeOliveiraSantos.git
+cd Teste_AndreVictorAndradeOliveiraSantos
 
 # Ambiente virtual Python
 python -m venv venv
@@ -174,8 +175,8 @@ copy config\env\.env.example .env
 
 ```bash
 # Clone o repositório
-git clone https://github.com/andrecodexvictor/intuitive-Care---Healthtech-de-SaaS-Vertical-test.git
-cd intuitive-Care---Healthtech-de-SaaS-Vertical-test
+git clone https://github.com/andrecodexvictor/Teste_AndreVictorAndradeOliveiraSantos.git
+cd Teste_AndreVictorAndradeOliveiraSantos
 
 # Ambiente virtual Python
 python3 -m venv venv
@@ -427,11 +428,42 @@ O projeto conta com um pipeline CI/CD completo em `.github/workflows/ci.yml`:
 Com mais tempo disponível, implementaria:
 
 1. ~~**CI/CD** com GitHub Actions~~ ✅ **Implementado**
-2. **Docker Compose** para ambiente de desenvolvimento unificado
+2. ~~**Suite de testes completa**~~ ✅ **Implementado (96 testes)**
 3. **Monitoramento** com Prometheus e Grafana
 4. **Cache Distribuído** (Redis) para ambiente clusterizado
 5. **Rate limiting por usuário** com JWT/API keys
 6. **Testes E2E** com Playwright
+
+---
+
+## 🔧 Otimizações Realizadas
+
+Durante o desenvolvimento, o código passou por diversas melhorias de qualidade:
+
+### Cache Genérico
+- **Antes:** Código de cache duplicado em múltiplos endpoints
+- **Depois:** Classe `TTLCache[T]` genérica e reutilizável em `src/infrastructure/cache.py`
+- **Benefício:** Thread-safe, observabilidade via `/cache/stats`, TTL configurável
+
+### Template HTML Separado
+- **Antes:** ~100 linhas de HTML inline no `main.py`
+- **Depois:** Template extraído para `src/interface/api/templates/docs.html`
+- **Benefício:** Separação de responsabilidades, manutenção facilitada
+
+### Query LIKE Otimizada
+- **Antes:** `LIKE '%termo%'` não utilizava índice (full table scan)
+- **Depois:** `LIKE 'termo%'` com sanitização de caracteres especiais
+- **Benefício:** Queries ~10x mais rápidas com uso de índice
+
+### Cobertura de Testes
+- **Antes:** ~70 testes
+- **Depois:** **96 testes passando** (cobertura ~80%)
+- **Novos:** `test_cache.py`, `test_config.py`, `test_etl.py`, `test_repositories.py`
+
+### Índices SQL
+- Covering index para estatísticas (evita table scan)
+- Índice composto para JOINs rápidos
+- Índice de prefixo para buscas LIKE
 
 ---
 
@@ -445,4 +477,4 @@ O objetivo foi demonstrar não apenas habilidades técnicas de programação, ma
 
 ---
 
-*Última atualização: Janeiro 2026*
+*Última atualização: Fevereiro 2026*

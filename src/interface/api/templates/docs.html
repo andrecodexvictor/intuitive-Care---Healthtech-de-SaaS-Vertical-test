@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API de Despesas - Documentação</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-code: #0f172a;
+            --text-primary: #eee;
+            --text-secondary: #94a3b8;
+            --text-muted: #666;
+            --accent-primary: #0ea5e9;
+            --accent-secondary: #38bdf8;
+            --color-get: #22c55e;
+            --color-post: #3b82f6;
+            --color-put: #f59e0b;
+            --color-delete: #ef4444;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            padding: 40px; 
+            background: var(--bg-primary); 
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        h1 { 
+            color: var(--accent-primary); 
+            margin-bottom: 10px;
+        }
+        
+        h2 { 
+            color: var(--accent-secondary); 
+            border-bottom: 1px solid #333; 
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        
+        .endpoint { 
+            background: var(--bg-secondary); 
+            padding: 15px 20px; 
+            border-radius: 8px; 
+            margin: 15px 0;
+            border-left: 4px solid var(--accent-primary);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .endpoint:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .method { 
+            display: inline-block; 
+            padding: 4px 12px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            margin-right: 10px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .get { background: var(--color-get); color: #fff; }
+        .post { background: var(--color-post); color: #fff; }
+        .put { background: var(--color-put); color: #fff; }
+        .delete { background: var(--color-delete); color: #fff; }
+        
+        code { 
+            background: var(--bg-code); 
+            padding: 2px 8px; 
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        a { 
+            color: var(--accent-secondary);
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .desc { 
+            color: var(--text-secondary); 
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        .cache-info {
+            display: inline-block;
+            background: #7c3aed;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+        
+        .rate-limit {
+            display: inline-block;
+            background: #f97316;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏥 API de Análise de Despesas</h1>
+    <p class="subtitle">Intuitive Care - Teste Técnico para Estágio</p>
+    
+    <h2>📋 Operadoras</h2>
+    
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/operadoras</code>
+        <span class="rate-limit">100/min</span>
+        <div class="desc">Lista paginada de operadoras. Params: <code>page</code>, <code>limit</code>, <code>razao_social</code>, <code>cnpj</code></div>
+    </div>
+    
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/operadoras/{cnpj}</code>
+        <span class="rate-limit">100/min</span>
+        <div class="desc">Detalhes de uma operadora específica</div>
+    </div>
+    
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/operadoras/{cnpj}/despesas</code>
+        <span class="rate-limit">100/min</span>
+        <div class="desc">Histórico de despesas de uma operadora. Params: <code>ano</code>, <code>trimestre</code></div>
+    </div>
+    
+    <h2>📊 Estatísticas</h2>
+    
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/estatisticas</code>
+        <span class="cache-info">Cache 24h</span>
+        <span class="rate-limit">50/min</span>
+        <div class="desc">Estatísticas gerais: total, média, top 5 operadoras</div>
+    </div>
+    
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/estatisticas/distribuicao-uf</code>
+        <span class="cache-info">Cache 24h</span>
+        <span class="rate-limit">50/min</span>
+        <div class="desc">Distribuição de despesas por UF</div>
+    </div>
+    
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/estatisticas/operadoras-acima-media</code>
+        <span class="cache-info">Cache 24h</span>
+        <span class="rate-limit">50/min</span>
+        <div class="desc">Operadoras com despesas acima da média em 2+ trimestres (Query 3)</div>
+    </div>
+    
+    <h2>🔧 Utilitários</h2>
+    
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/health</code>
+        <div class="desc">Health check - verifica se a API está saudável</div>
+    </div>
+    
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/metrics</code>
+        <div class="desc">Métricas de performance da API</div>
+    </div>
+    
+    <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/cache/stats</code>
+        <div class="desc">Estatísticas dos caches (hits, misses, hit rate)</div>
+    </div>
+    
+    <div class="footer">
+        <p>Versão {{version}} | <a href="/">Voltar</a> | <a href="/openapi.json">OpenAPI JSON</a></p>
+        <p>© 2026 André Victor Andrade Oliveira Santos</p>
+    </div>
+</body>
+</html>

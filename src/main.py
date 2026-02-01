@@ -1,23 +1,5 @@
-# =============================================================
-# main.py - Entry Point da Aplicação FastAPI
-# =============================================================
-# ARQUITETURA: Clean Architecture - Infraestrutura (Framework)
-#
-# Este arquivo é o ponto de entrada da aplicação.
-# Responsabilidades:
-# 1. Criar instância do FastAPI.
-# 2. Configurar middleware (CORS, logging, errors, security).
-# 3. Registrar routers.
-# 4. Definir eventos de lifecycle (startup, shutdown).
-#
-# EXECUÇÃO:
-# uvicorn src.main:app --reload --port 8000
-#
-# DOCUMENTAÇÃO AUTOMÁTICA:
-# - Swagger UI: http://localhost:8000/docs
-# - ReDoc: http://localhost:8000/redoc
-# - OpenAPI JSON: http://localhost:8000/openapi.json
-# =============================================================
+# main.py - FastAPI application entry point
+# Execução: uvicorn src.main:app --reload --port 8000
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -36,17 +18,8 @@ from src.interface.api.schemas import HealthCheckResponse, ErrorResponse
 from slowapi.errors import RateLimitExceeded
 
 
-# =============================================================
-# CONFIGURAÇÃO DE LOGGING (Loguru)
-# =============================================================
-# DECISÃO: Usar Loguru ao invés do logging padrão.
-# JUSTIFICATIVA:
-# - API mais simples: logger.info() vs logging.getLogger().info()
-# - Output colorido no console (facilita debugging)
-# - Rotação automática de arquivos de log
-# - Captura automática de exceptions com traceback
-# =============================================================
-logger.remove()  # Remove handler padrão
+# Configuração do Loguru (mais simples que logging padrão)
+logger.remove()
 logger.add(
     sys.stderr,
     format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
@@ -314,93 +287,40 @@ app.include_router(estatisticas.router)
 
 
 # =============================================================
-# DOCUMENTAÇÃO FALLBACK (para Python < 3.10)
+# DOCUMENTAÇÃO CUSTOMIZADA (Template Externo)
 # =============================================================
-# NOTA: Se usar Python 3.9, o Swagger automático pode falhar.
-# Esta página HTML serve como fallback.
+# Refatorado: HTML extraído para arquivo de template.
+# Benefícios:
+# - Código Python mais limpo (~100 linhas removidas)
+# - Template editável por designers
+# - Facilita customização do estilo
 # =============================================================
 from fastapi.responses import HTMLResponse
+from pathlib import Path
+
+DOCS_TEMPLATE_PATH = Path(__file__).parent / "interface" / "api" / "templates" / "docs.html"
 
 @app.get("/docs", include_in_schema=False)
 async def api_docs():
-    """Swagger UI customizado."""
-    return HTMLResponse("""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>API de Despesas - Documentação</title>
-        <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 40px; background: #1a1a2e; color: #eee; }
-            h1 { color: #0ea5e9; }
-            h2 { color: #38bdf8; border-bottom: 1px solid #333; padding-bottom: 10px; }
-            .endpoint { background: #16213e; padding: 15px; border-radius: 8px; margin: 15px 0; }
-            .method { display: inline-block; padding: 4px 12px; border-radius: 4px; font-weight: bold; margin-right: 10px; }
-            .get { background: #22c55e; color: #fff; }
-            .post { background: #3b82f6; color: #fff; }
-            code { background: #0f172a; padding: 2px 6px; border-radius: 4px; }
-            a { color: #38bdf8; }
-            .desc { color: #94a3b8; margin-top: 8px; }
-        </style>
-    </head>
-    <body>
-        <h1>🏥 API de Análise de Despesas</h1>
-        <p>Intuitive Care - Teste Técnico para Estágio</p>
-        
-        <h2>📋 Operadoras</h2>
-        
-        <div class="endpoint">
-            <span class="method get">GET</span>
-            <code>/api/operadoras</code>
-            <div class="desc">Lista paginada de operadoras. Params: page, limit, razao_social, cnpj</div>
-        </div>
-        
-        <div class="endpoint">
-            <span class="method get">GET</span>
-            <code>/api/operadoras/{cnpj}</code>
-            <div class="desc">Detalhes de uma operadora específica</div>
-        </div>
-        
-        <div class="endpoint">
-            <span class="method get">GET</span>
-            <code>/api/operadoras/{cnpj}/despesas</code>
-            <div class="desc">Histórico de despesas de uma operadora. Params: ano, trimestre</div>
-        </div>
-        
-        <h2>📊 Estatísticas</h2>
-        
-        <div class="endpoint">
-            <span class="method get">GET</span>
-            <code>/api/estatisticas</code>
-            <div class="desc">Estatísticas gerais: total, média, top 5 operadoras</div>
-        </div>
-        
-        <div class="endpoint">
-            <span class="method get">GET</span>
-            <code>/api/estatisticas/distribuicao-uf</code>
-            <div class="desc">Distribuição de despesas por UF</div>
-        </div>
-        
-        <h2>🔧 Utilitários</h2>
-        
-        <div class="endpoint">
-            <span class="method get">GET</span>
-            <code>/health</code>
-            <div class="desc">Health check - verifica se a API está saudável</div>
-        </div>
-        
-        <div class="endpoint">
-            <span class="method get">GET</span>
-            <code>/metrics</code>
-            <div class="desc">Métricas de performance da API</div>
-        </div>
-        
-        <hr style="margin: 30px 0; border-color: #333;">
-        <p style="color: #666;">Versão 1.0.0 | <a href="/">Voltar</a></p>
-    </body>
-    </html>
-    """)
+    """Swagger UI customizado - carrega template HTML externo."""
+    try:
+        html_content = DOCS_TEMPLATE_PATH.read_text(encoding="utf-8")
+        # Substitui placeholders
+        html_content = html_content.replace("{{version}}", settings.API_VERSION)
+        return HTMLResponse(html_content)
+    except FileNotFoundError:
+        # Fallback minimalista se template não existir
+        return HTMLResponse(f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>API Docs</title></head>
+        <body style="font-family: sans-serif; padding: 40px;">
+            <h1>API de Análise de Despesas v{settings.API_VERSION}</h1>
+            <p>Template de documentação não encontrado.</p>
+            <p><a href="/openapi.json">OpenAPI JSON</a></p>
+        </body>
+        </html>
+        """)
 
 
 # =============================================================
@@ -474,6 +394,28 @@ async def metrics_endpoint():
             "error": "Módulo de observabilidade não disponível",
             "message": "Use o módulo completo para métricas avançadas"
         }
+
+
+@app.get(
+    "/cache/stats",
+    summary="Estatísticas de Cache",
+    description="Retorna estatísticas dos caches da aplicação.",
+    tags=["Utilitários"],
+)
+async def cache_stats():
+    """
+    Endpoint para monitorar performance dos caches.
+    
+    Retorna:
+    - Hit rate de cada cache
+    - Total de requisições
+    - Status atual (válido/expirado)
+    """
+    from src.infrastructure.cache import CacheRegistry
+    return {
+        "caches": CacheRegistry.get_all_stats(),
+        "timestamp": datetime.now().isoformat(),
+    }
 
 
 # =============================================================

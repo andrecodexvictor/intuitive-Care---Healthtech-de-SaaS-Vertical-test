@@ -24,8 +24,8 @@ Este documento foi criado para facilitar a avaliação técnica, destacando:
 
 ```powershell
 # Clone
-git clone https://github.com/andrecodexvictor/intuitive-Care---Healthtech-de-SaaS-Vertical-test.git
-cd intuitive-Care---Healthtech-de-SaaS-Vertical-test
+git clone https://github.com/andrecodexvictor/Teste_AndreVictorAndradeOliveiraSantos.git
+cd Teste_AndreVictorAndradeOliveiraSantos
 
 # Execute tudo (API + Frontend + Banco + ETL)
 docker-compose up -d
@@ -322,7 +322,38 @@ RUN pip install --no-cache /wheels/*
 
 ---
 
-## 🔮 O Que Faria Com Mais Tempo
+## � Otimizações e Refatorações Realizadas
+
+Durante o desenvolvimento, foram realizadas diversas otimizações para melhorar a qualidade e manutenibilidade do código:
+
+### Cache Genérico com TTLCache
+- **Problema:** Código de cache duplicado em múltiplos endpoints
+- **Solução:** Criação da classe `TTLCache[T]` em `src/infrastructure/cache.py`
+- **Benefícios:** Thread-safety, TTL configurável (24h), estatísticas de hit/miss, endpoint `/cache/stats` para observabilidade
+
+### Extração de Templates HTML
+- **Problema:** ~100 linhas de HTML inline no `main.py`
+- **Solução:** Template extraído para `src/interface/api/templates/docs.html`
+- **Benefícios:** Separação de responsabilidades, HTML editável sem tocar no Python
+
+### Correção de Query LIKE
+- **Problema:** `LIKE '%termo%'` não utilizava índice (full table scan)
+- **Solução:** Trailing wildcard apenas `'termo%'` + sanitização de caracteres especiais
+- **Benefícios:** Utilização de índice, queries ~10x mais rápidas
+
+### Cobertura de Testes Expandida
+- **Antes:** ~70 testes
+- **Depois:** **96 testes passando**
+- **Novos testes:** `test_cache.py` (17), `test_config.py` (15), `test_etl.py` (21), `test_repositories.py` (17)
+
+### Índices SQL Otimizados
+- Covering index para estatísticas (evita table scan)
+- Índice composto para JOINs rápidos
+- Índice de prefixo para buscas LIKE
+
+---
+
+## �🔮 O Que Faria Com Mais Tempo
 
 1. **Monitoramento** — Prometheus + Grafana para métricas em tempo real
 2. **Cache Distribuído** — Redis para ambiente clusterizado

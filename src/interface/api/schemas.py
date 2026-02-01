@@ -1,24 +1,6 @@
 from __future__ import annotations
-# =============================================================
-# schemas.py - Schemas de Request/Response da API
-# =============================================================
-# ARQUITETURA: Clean Architecture - Interface Layer
-#
-# DIFERENÇA ENTRE SCHEMAS E ENTITIES:
-# - Entities (domain/entities.py): Modelo de negócio interno.
-# - Schemas (este arquivo): Contrato da API (o que o cliente vê).
-#
-# POR QUE SEPARAR?
-# 1. API pode ter campos diferentes da entidade interna.
-#    Ex: Entidade tem "status_qualidade", API pode traduzir para PT.
-# 2. Versionamento: API v1 pode ter schema diferente de API v2.
-# 3. Segurança: Não expor campos internos (ex: hashes, flags debug).
-#
-# CONVENÇÃO:
-# - *Request: Dados recebidos do cliente.
-# - *Response: Dados enviados ao cliente.
-# - *InDB: Representação completa (inclui IDs gerados).
-# =============================================================
+# schemas.py - API Request/Response contracts
+# Separados das entities para maior flexibilidade no versionamento
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
@@ -28,14 +10,7 @@ from datetime import datetime
 # SCHEMAS DE OPERADORA
 # =============================================================
 class OperadoraResponse(BaseModel):
-    """
-    Schema de resposta para dados de uma operadora.
-    
-    DECISÃO: Expor todos os campos da entidade.
-    JUSTIFICATIVA: 
-    - Não há dados sensíveis em operadoras.
-    - Frontend precisa de todas as informações.
-    """
+    """Response schema para dados de operadora."""
     cnpj: str = Field(..., description="CNPJ da operadora (14 dígitos)")
     razao_social: str = Field(..., description="Nome oficial da operadora")
     registro_ans: Optional[str] = Field(None, description="Registro na ANS (6 dígitos)")

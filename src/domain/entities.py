@@ -1,22 +1,5 @@
-# =============================================================
-# entities.py - Entidades do Domínio (Pydantic Models)
-# =============================================================
-# ARQUITETURA: Clean Architecture - Camada de Domínio
-#
-# DECISÃO: Usar Pydantic V2 para definir entidades.
-# JUSTIFICATIVA:
-# 1. Validação automática de dados na criação do objeto.
-# 2. Serialização/deserialização JSON nativa.
-# 3. Integração perfeita com FastAPI para request/response.
-# 4. Type hints que funcionam em runtime (não apenas IDE).
-#
-# DIFERENÇA IMPORTANTE:
-# - "Entities" (este arquivo): Modelos de negócio puros, usados em TODA a app.
-# - "ORM Models" (infrastructure/database/models.py): Mapeamento para tabelas.
-# - "Schemas" (interface/api/schemas.py): Contratos de API (request/response).
-#
-# As entidades podem ser convertidas para/de ORM models e schemas.
-# =============================================================
+# entities.py - Domain entities (Pydantic models)
+# Modelos de negócio puros, separados dos ORM models e API schemas
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from datetime import date
@@ -33,12 +16,7 @@ from enum import Enum
 # - Fácil de estender se surgir novo status.
 # =============================================================
 class StatusQualidade(str, Enum):
-    """
-    Status de qualidade do registro de dados.
-    
-    Usado para marcar registros que passaram por validação
-    e indicar se há algum problema detectado.
-    """
+    """Status de validação dos registros de dados."""
     OK = "OK"  # Dados válidos, sem problemas detectados
     CNPJ_INVALIDO = "CNPJ_INVALIDO"  # CNPJ falhou na validação de dígitos
     VALOR_SUSPEITO = "VALOR_SUSPEITO"  # Valor negativo, zero ou muito alto
@@ -47,11 +25,7 @@ class StatusQualidade(str, Enum):
 
 
 class Modalidade(str, Enum):
-    """
-    Modalidade de operação da operadora de plano de saúde.
-    
-    Conforme classificação da ANS (Agência Nacional de Saúde Suplementar).
-    """
+    """Modalidade de operação da operadora (classificação ANS)."""
     COOPERATIVA_MEDICA = "Cooperativa Médica"
     MEDICINA_GRUPO = "Medicina de Grupo"
     SEGURADORA = "Seguradora Especializada em Saúde"
@@ -68,33 +42,15 @@ class Modalidade(str, Enum):
 # =============================================================
 class CNPJ(BaseModel):
     """
-    Value Object para CNPJ (Cadastro Nacional da Pessoa Jurídica).
-    
-    DECISÃO: Criar classe específica ao invés de usar str.
-    JUSTIFICATIVA:
-    - Encapsula validação (dígitos verificadores).
-    - Formato normalizado (apenas números, 14 dígitos).
-    - Evita CNPJs inválidos circulando pelo sistema.
-    
-    VALIDAÇÃO DOS DÍGITOS:
-    O CNPJ tem 14 dígitos: 12 base + 2 verificadores.
-    Os verificadores são calculados por módulo 11.
+    Value Object para CNPJ com validação de dígitos verificadores.
+    Normaliza formato (apenas 14 dígitos numéricos).
     """
     valor: str = Field(..., min_length=14, max_length=14, pattern=r"^\d{14}$")
     
     @field_validator("valor")
     @classmethod
     def validar_cnpj(cls, v: str) -> str:
-        """
-        Valida os dígitos verificadores do CNPJ.
-        
-        ALGORITMO:
-        1. Multiplica os 12 primeiros dígitos por pesos [5,4,3,2,9,8,7,6,5,4,3,2]
-        2. Soma tudo, calcula resto por 11, subtrai de 11 = primeiro dígito
-        3. Repete com 13 dígitos e pesos [6,5,4,3,2,9,8,7,6,5,4,3,2]
-        
-        FONTE: http://www.receita.fazenda.gov.br/
-        """
+        """Valida dígitos verificadores do CNPJ (algoritmo módulo 11)."""
         # Remove formatação se houver (pontos, barras, hífens)
         numeros = "".join(c for c in v if c.isdigit())
         
@@ -143,12 +99,7 @@ class CNPJ(BaseModel):
 
 
 class Periodo(BaseModel):
-    """
-    Value Object para representar um período trimestral.
-    
-    FORMATO: ano (YYYY) + trimestre (1-4)
-    EXEMPLO: Periodo(ano=2024, trimestre=3) = "3º Trimestre de 2024"
-    """
+    """Período trimestral: ano (YYYY) + trimestre (1-4)."""
     ano: int = Field(..., ge=2000, le=2100)
     trimestre: int = Field(..., ge=1, le=4)
     

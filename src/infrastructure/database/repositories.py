@@ -78,7 +78,7 @@ class OperadoraRepository(IOperadoraRepository):
         
         QUERY GERADA (com filtros):
         SELECT * FROM operadoras
-        WHERE razao_social LIKE '%filtro%'
+        WHERE razao_social LIKE 'filtro%'
         ORDER BY razao_social
         LIMIT 20 OFFSET 40
         
@@ -86,18 +86,27 @@ class OperadoraRepository(IOperadoraRepository):
         - OFFSET grande é lento (MySQL precisa pular N registros).
         - Para ~5000 operadoras, é aceitável.
         - Se fosse 1 milhão, usaríamos cursor-based.
+        
+        BUGFIX: LIKE agora usa trailing wildcard apenas (termo%).
+        - Wildcard inicial (%termo) impede uso de índice.
+        - Trailing wildcard permite uso do índice idx_razao_social.
         """
         query = self.db.query(OperadoraORM)
         
-        # Aplica filtros
+        # Aplica filtros - BUGFIX: usar trailing wildcard apenas
+        # para permitir uso de índice no MySQL
         if razao_social_filter:
+            # Sanitiza entrada para evitar SQL injection via LIKE patterns
+            safe_filter = razao_social_filter.replace("%", "").replace("_", "")
             query = query.filter(
-                OperadoraORM.razao_social.ilike(f"%{razao_social_filter}%")
+                OperadoraORM.razao_social.ilike(f"{safe_filter}%")
             )
         
         if cnpj_filter:
+            # CNPJ: busca exata ou prefixo (trailing wildcard)
+            safe_cnpj = cnpj_filter.replace("%", "").replace("_", "")
             query = query.filter(
-                OperadoraORM.cnpj.like(f"%{cnpj_filter}%")
+                OperadoraORM.cnpj.like(f"{safe_cnpj}%")
             )
         
         # Conta total (para paginação no frontend)

@@ -6,18 +6,28 @@ from __future__ import annotations
 #
 # Este router agrupa endpoints de agregação e analytics.
 # São queries mais pesadas, então implementamos cache.
+#
+# REFATORAÇÃO: Cache migrado para classe TTLCache genérica.
+# - Código mais limpo e reutilizável
+# - Thread-safe com locks
+# - TTL de 24h para dados trimestrais (ao invés de 15min)
+# - Preparado para migrar para Redis se necessário
 # =============================================================
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
-from functools import lru_cache
-from datetime import datetime, timedelta
 from typing import List
 
 from src.infrastructure.database.connection import get_db
 from src.infrastructure.database.repositories import DespesaRepository
 from src.infrastructure.database.models import DespesaORM, OperadoraORM
 from src.infrastructure.rate_limiter import limiter
+from src.infrastructure.cache import (
+    estatisticas_cache,
+    acima_media_cache,
+    distribuicao_uf_cache,
+    CacheRegistry,
+)
 from src.interface.api.schemas import (
     EstatisticasResponse,
     TopOperadoraResponse,
@@ -30,73 +40,6 @@ router = APIRouter(
     prefix="/api/estatisticas",
     tags=["Estatísticas"],
 )
-
-
-# =============================================================
-# CACHE DE ESTATÍSTICAS
-# =============================================================
-# DECISÃO: Usar cache em memória (lru_cache) para estatísticas.
-# JUSTIFICATIVA:
-# - Query de agregação é custosa (processa milhares de registros).
-# - Dados atualizados trimestralmente (não precisa real-time).
-# - Cache de 15 minutos é suficiente.
-#
-# TRADE-OFF:
-# - Em produção com múltiplas instâncias, usaríamos Redis.
-# - lru_cache funciona apenas em processo único.
-# - Para este protótipo, é suficiente.
-#
-# IMPLEMENTAÇÃO:
-# - Cache com timestamp (invalida após 15 min).
-# - Simples mas efetivo para MVP.
-# =============================================================
-_cache_estatisticas = None
-_cache_timestamp = None
-_cache_acima_media = None
-_cache_acima_media_timestamp = None
-CACHE_TTL_MINUTES = 15
-
-
-def get_cached_estatisticas():
-    """Retorna estatísticas cacheadas ou None se expirado."""
-    global _cache_estatisticas, _cache_timestamp
-    
-    if _cache_estatisticas is None:
-        return None
-    
-    if datetime.now() - _cache_timestamp > timedelta(minutes=CACHE_TTL_MINUTES):
-        _cache_estatisticas = None
-        return None
-    
-    return _cache_estatisticas
-
-
-def set_cached_estatisticas(data):
-    """Armazena estatísticas no cache."""
-    global _cache_estatisticas, _cache_timestamp
-    _cache_estatisticas = data
-    _cache_timestamp = datetime.now()
-
-
-def get_cached_acima_media():
-    """Retorna cache de operadoras acima da média."""
-    global _cache_acima_media, _cache_acima_media_timestamp
-    
-    if _cache_acima_media is None:
-        return None
-    
-    if datetime.now() - _cache_acima_media_timestamp > timedelta(minutes=CACHE_TTL_MINUTES):
-        _cache_acima_media = None
-        return None
-    
-    return _cache_acima_media
-
-
-def set_cached_acima_media(data):
-    """Armazena operadoras acima da média no cache."""
-    global _cache_acima_media, _cache_acima_media_timestamp
-    _cache_acima_media = data
-    _cache_acima_media_timestamp = datetime.now()
 
 
 # =============================================================
@@ -116,7 +59,7 @@ def set_cached_acima_media(data):
     - Top 5 operadoras com maiores despesas
     
     **Cache:**
-    Resultados são cacheados por 15 minutos para melhor performance.
+    Resultados são cacheados por 24 horas para melhor performance.
     
     **Rate Limit:** 50 requisições/minuto por IP (query pesada)
     """,
@@ -131,7 +74,7 @@ async def obter_estatisticas(
     
     PERFORMANCE:
     - Query agrega todos os registros (pode ser lenta).
-    - Cache de 15 min evita recálculo desnecessário.
+    - Cache de 24h evita recálculo desnecessário (dados trimestrais).
     
     DECISÃO: Calcular na hora (com cache) ao invés de pré-calcular.
     JUSTIFICATIVA:
@@ -139,8 +82,8 @@ async def obter_estatisticas(
     - Pré-calcular adicionaria complexidade (tabela materializada).
     - Cache simples resolve para este volume (~10K registros).
     """
-    # Tenta cache primeiro
-    cached = get_cached_estatisticas()
+    # Tenta cache primeiro (usa nova classe TTLCache)
+    cached = estatisticas_cache.get()
     if cached:
         return cached
     
@@ -157,8 +100,8 @@ async def obter_estatisticas(
         ],
     )
     
-    # Armazena no cache
-    set_cached_estatisticas(result)
+    # Armazena no cache (nova classe TTLCache)
+    estatisticas_cache.set(result)
     
     return result
 
@@ -256,8 +199,8 @@ async def obter_operadoras_acima_media(
     3. Filtra somente operadoras com 2+ trimestres acima
     4. Ordena por total de despesas (maior primeiro)
     """
-    # Tenta cache
-    cached = get_cached_acima_media()
+    # Tenta cache (usa nova classe TTLCache)
+    cached = acima_media_cache.get()
     if cached:
         return cached[:limit]
     
@@ -310,7 +253,7 @@ async def obter_operadoras_acima_media(
         for r in results
     ]
     
-    # Cache
-    set_cached_acima_media(response)
+    # Cache (usa nova classe TTLCache)
+    acima_media_cache.set(response)
     
     return response[:limit]
