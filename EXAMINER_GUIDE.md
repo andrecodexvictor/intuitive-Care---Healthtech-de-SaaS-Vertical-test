@@ -56,7 +56,6 @@ Instruções detalhadas no [README.md](README.md#-opção-2-instalação-manual)
 ### 🔹 Teste 1: Web Scraping (Análise de PDF)
 | Requisito | Status | Localização |
 |-----------|--------|-------------|
-| Script de leitura do PDF ANS | ✅ | `read_pdf.py` |
 | Download automático | ✅ | `src/etl/downloader.py` |
 
 ### 🔹 Teste 2: Transformação de Dados
