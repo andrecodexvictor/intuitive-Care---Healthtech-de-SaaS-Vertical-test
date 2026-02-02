@@ -300,22 +300,22 @@ RUN pip install --no-cache /wheels/*
 ## 📁 Estrutura de Arquivos
 
 ```
-├── config/               # ⚙️ Configurações de ambiente
+├── config/               #  Configurações de ambiente
 │   └── env/              # Templates .env.*
-├── docker/               # 🐳 Dockerfiles organizados
+├── docker/               #  Dockerfiles organizados
 │   ├── api/              # API Python/FastAPI
 │   └── frontend/         # Vue.js + Nginx
-├── docs/                 # 📚 Documentação técnica
+├── docs/                 #  Documentação técnica
 │   └── Postman_Collection.json
-├── frontend/             # 🎨 Dashboard Vue.js 3
-├── sql/                  # 🗄️ DDL e queries
-├── src/                  # 🐍 Código-fonte Python
+├── frontend/             #  Dashboard Vue.js 3
+├── sql/                  #  DDL e queries
+├── src/                  #  Código-fonte Python
 │   ├── domain/           # Regras de negócio
 │   ├── application/      # Interfaces abstratas
 │   ├── infrastructure/   # Implementações (DB, cache)
 │   ├── interface/        # API REST (FastAPI)
 │   └── etl/              # Pipeline de ingestão
-├── tests/                # 🧪 Suite pytest
+├── tests/                #  Suite pytest
 ├── docker-compose.yml    # Orquestração
 ├── requirements.txt      # Dependências Python
 ├── run_etl.py            # Script de carga
